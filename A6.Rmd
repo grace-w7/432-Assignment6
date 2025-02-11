@@ -1,0 +1,101 @@
+---
+title: "A6"
+author: "Grace Wolfe"
+date: "2025-02-11"
+output: html_document
+---
+
+#Assignment 6#
+*Grace Wolfe (20302888), Jennah Levac (), Kyle Samson()*
+
+*Q3*
+```{r echo = T, results = 'hide', warning = FALSE}
+library(parallel)
+library(doParallel)
+library(foreach)
+```
+
+*Q4*
+
+```{r}
+cores_num <- detectCores()
+cores_num
+```
+
+There are 6 cores in total. 
+
+*Q5 & 6*
+
+```{r}
+set.seed(028)
+```
+
+```{r}
+start_time <- Sys.time()
+```
+
+Creating a standard for loop 4,000 times, and each time calculate the mean of 100,000 random numbers from a normal distribution with mean of 10 and standard deviation of 3.
+
+```{r}
+for(i in 1:4000){
+  mean(rnorm(100000, mean = 10, sd = 3))
+}
+```
+
+```{r}
+end_time <- Sys.time()
+```
+
+```{r}
+serial_runtime <- end_time - start_time
+serial_runtime
+```
+
+*Q7*
+
+```{r}
+theoretical_runtime <- serial_runtime / cores_num
+theoretical_runtime
+```
+
+*Q8*
+
+```{r}
+cores <- makeCluster(cores_num - 1)  
+registerDoParallel(cores)
+```
+
+```{r}
+start_time_par <- Sys.time()
+```
+
+Creating a modified loop that runs the 4,000 loops in parallel rather than one at a time.
+
+```{r echo = T, results = 'hide'}
+parallel <- foreach(i = 1:4000, .combine = rbind) %dopar% {
+  mean(rnorm(100000, mean = 10, sd = 3))
+}
+```
+
+```{r}
+end_time_par <- Sys.time()
+```
+
+
+*Q9*
+
+```{r}
+parallel_runtime <- end_time_par - start_time_par
+parallel_runtime
+
+```
+
+*Q10*
+
+Serial runtime: 24.57 s
+
+Theoretical runtime: 4.10 s
+
+Parallel runtime: 10.45 s 
+
+As expected, the serial runtime is the longest, theoretical the shortest, and the parallel runtime falls inbetween. Running in parallel allows multiple calculations to occur simutaneously, rather than just one at a time. This makes the overall process faster. Internal processes within the computer may impede the speed of running in parallel, hence why the theoretical runtime is an underestimate of the time it will take. 
